@@ -1,6 +1,6 @@
 # YouTube Liked Videos Search Extension
 
-A browser extension that lets you search through your YouTube liked videos with fuzzy matching and caching.
+A browser extension that lets you search through your YouTube liked videos with fuzzy matching and caching the best there is
 
 ## Features
 
