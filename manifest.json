@@ -15,7 +15,18 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": [   
-    "storage"
+  "permissions": [
+    "storage",
+    "identity"
+  ],
+  "oauth2": {
+    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/youtube.readonly"
+    ]
+  },
+  "host_permission": [
+    "https://www.googleapis.com/*"
   ]
 }
+
