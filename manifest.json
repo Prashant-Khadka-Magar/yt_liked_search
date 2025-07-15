@@ -17,16 +17,18 @@
   },
   "permissions": [
     "storage",
-    "identity"
+    "identity",
+    "alarms"
   ],
   "oauth2": {
-    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "client_id": "551812743698-rl8tab59h603h3h75bvrehhe2nimh1ik.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/youtube.readonly"
     ]
   },
-  "host_permission": [
-    "https://www.googleapis.com/*"
+  "host_permissions": [
+    "https://www.googleapis.com/*",
+    "https://oauth2.googleapis.com/*",
+    "https://accounts.google.com/*"
   ]
 }
-

@@ -1,9 +1,4 @@
-// chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
-// //   console.log(data);
-
-//   chrome.storage.local.set({title: data.title});
-//   sendResponse({ success: true });
-//   return true;
-// });
-
-
+// background.js
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("YT Liked Search extension installed.");
+});

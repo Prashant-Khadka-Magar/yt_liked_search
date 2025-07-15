@@ -4,37 +4,63 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="./popup.css">
-  <title>Popup</title>
+  <title>YT Liked Search</title>
+  
 </head>
 <body>
-   <div class="container">
-        <div class="logo">🔍 YT Liked Search</div>
-        
-        <div id="auth-section" class="auth-section">
-            <div id="login-view">
-                <p>Sign in with Google to search your liked videos</p>
-                <button id="auth-btn">🔐 Sign In</button>
-            </div>
-            
-            <div id="user-view" class="hidden">
-                <div class="user-info">
-                    <div id="user-name">Welcome!</div>
-                </div>
-                <button id="logout-btn">Sign Out</button>
-            </div>
-        </div>
-        
-        <div id="search-section" class="search-section hidden">
-            <input type="text" id="search-input" placeholder="Search your liked videos...">
-            <button id="search-btn">🔍 Search</button>
-            <button id="fetch-all-btn">📥 Fetch All Liked</button>
-            
-            <div id="loading" class="loading hidden">Loading...</div>
-            <div id="error" class="error hidden"></div>
-            <div id="results" class="results"></div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🔍 YT Liked Search</div>
+      <div class="subtitle">Search through your liked videos</div>
     </div>
     
-    <script src="popup.js"></script>
+    <div class="content">
+      <div id="auth-section" class="auth-section">
+        <div id="login-view">
+          <p>Connect your YouTube account to search through all your liked videos instantly.</p>
+          <button id="auth-btn" class="btn">
+            🔐 Sign In with Google
+          </button>
+        </div>
+        
+        <div id="user-view" class="hidden">
+          <div class="user-info">
+            <div id="user-name">Welcome!</div>
+            <button id="logout-btn" class="btn btn-secondary">Sign Out</button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="search-section" class="search-section hidden">
+        <div class="search-container">
+          <input type="text" id="search-input" class="search-input" placeholder="Search your liked videos...">
+        </div>
+        
+        <div class="search-controls">
+          <button id="search-btn" class="btn">🔍 Search</button>
+          <button id="refresh-btn" class="btn btn-secondary">🔄 Refresh</button>
+        </div>
+        
+        <div id="status" class="status hidden"></div>
+        <div id="loading" class="loading hidden">Loading</div>
+        <div id="error" class="error hidden"></div>
+        
+        <div id="results" class="results"></div>
+        
+        <div id="stats" class="stats hidden">
+          <div class="stat-item">
+            <div class="stat-value" id="total-videos">0</div>
+            <div class="stat-label">Total Videos</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="last-sync">Never</div>
+            <div class="stat-label">Last Sync</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="popup.js"></script>
 </body>
 </html>
