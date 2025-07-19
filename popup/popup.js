@@ -1,6 +1,5 @@
-
-// popup.js - Fixed version with proper stats display
-import { authenticateWithGoogle } from '../api/auth.js';
+// popup.js - Fixed version with persistent state management
+import { authenticateWithGoogle, isAuthenticated, getStoredToken, logout } from '../api/auth.js';
 import { 
   getAllLikedVideos, 
   getCachedVideos, 
@@ -9,8 +8,9 @@ import {
   searchVideos 
 } from '../api/youtube-api.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const loginBtn = document.getElementById('auth-btn');
+  const logoutBtn = document.getElementById('logout-btn');
   const searchBtn = document.getElementById('search-btn');
   const searchInput = document.getElementById('search-input');
   const resultsContainer = document.getElementById('results');
@@ -113,8 +113,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function showAuthenticatedView() {
+    loginView.classList.add('hidden');
+    userView.classList.remove('hidden');
+    searchSection.classList.remove('hidden');
+  }
+
+  function showLoginView() {
+    loginView.classList.remove('hidden');
+    userView.classList.add('hidden');
+    searchSection.classList.add('hidden');
+  }
+
   async function loadLikedVideos(forceRefresh = false) {
     try {
+      // Ensure we have a valid token
+      if (!currentToken) {
+        currentToken = await getStoredToken();
+        if (!currentToken) {
+          throw new Error('No authentication token available');
+        }
+      }
+
       // Check cache first
       const cached = await getCachedVideos();
       
@@ -149,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Enhanced search with debouncing + instant search option
+  // Enhanced search with debouncing
   let searchTimeout;
   function performSearch(immediate = false) {
     clearTimeout(searchTimeout);
@@ -175,22 +195,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Event listeners with hybrid approach
+  // Check authentication status on popup open
+  const authenticated = await isAuthenticated();
+  if (authenticated) {
+    currentToken = await getStoredToken();
+    showAuthenticatedView();
+    
+    // Load cached data immediately if available
+    const cached = await getCachedVideos();
+    if (cached.videos.length > 0) {
+      allLikedVideos = cached.videos;
+      updateStatus(`Loaded ${allLikedVideos.length} videos from cache`);
+      updateStats(allLikedVideos.length, cached.lastSync);
+      renderVideos(allLikedVideos);
+    } else {
+      // No cached data, load fresh data
+      await loadLikedVideos();
+    }
+  } else {
+    showLoginView();
+  }
+
+  // Event listeners
   loginBtn.addEventListener('click', async () => {
     try {
       showLoading('Authenticating...');
       currentToken = await authenticateWithGoogle();
       
-      loginView.classList.add('hidden');
-      userView.classList.remove('hidden');
-      searchSection.classList.remove('hidden');
-      
+      showAuthenticatedView();
       hideLoading();
       await loadLikedVideos();
       
     } catch (err) {
       console.error("Login failed:", err);
       showError('Authentication failed. Please try again.');
+    }
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    try {
+      await logout();
+      currentToken = null;
+      allLikedVideos = [];
+      resultsContainer.innerHTML = '';
+      showLoginView();
+      updateStatus('');
+      if (statsDiv) statsDiv.classList.add('hidden');
+    } catch (err) {
+      console.error("Logout failed:", err);
+      showError('Logout failed. Please try again.');
     }
   });
 
@@ -211,30 +264,5 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshBtn.addEventListener('click', () => {
       loadLikedVideos(true);
     });
-  }
-
-  // Load cached data on startup
-  getCachedVideos().then(cached => {
-    if (cached.videos.length > 0) {
-      allLikedVideos = cached.videos;
-      updateStatus(`Loaded ${allLikedVideos.length} videos from cache`);
-      updateStats(allLikedVideos.length, cached.lastSync);
-      renderVideos(allLikedVideos);
-    }
-  });
-});
-
-// background.js - Simplified version
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("YT Liked Search extension installed.");
-});
-
-// Optional: Add background sync if needed
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'clearCache') {
-    chrome.storage.local.clear(() => {
-      sendResponse({ success: true });
-    });
-    return true;
   }
 });
