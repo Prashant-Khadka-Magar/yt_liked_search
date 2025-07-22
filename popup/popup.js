@@ -1,4 +1,4 @@
-// popup.js - Fixed version with persistent state management
+
 import { authenticateWithGoogle, isAuthenticated, getStoredToken, logout } from '../api/auth.js';
 import { 
   getAllLikedVideos, 
@@ -127,7 +127,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function loadLikedVideos(forceRefresh = false) {
     try {
-      // Ensure we have a valid token
       if (!currentToken) {
         currentToken = await getStoredToken();
         if (!currentToken) {
@@ -135,7 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
-      // Check cache first
       const cached = await getCachedVideos();
       
       if (!forceRefresh && cached.videos.length > 0 && !shouldRefreshCache(cached.lastSync)) {
@@ -146,7 +144,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Fetch fresh data
       showLoading('Fetching your liked videos...');
       
       const videos = await getAllLikedVideos(currentToken, (progress) => {
@@ -195,13 +192,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Check authentication status on popup open
+
   const authenticated = await isAuthenticated();
   if (authenticated) {
     currentToken = await getStoredToken();
     showAuthenticatedView();
     
-    // Load cached data immediately if available
+
     const cached = await getCachedVideos();
     if (cached.videos.length > 0) {
       allLikedVideos = cached.videos;
@@ -209,14 +206,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateStats(allLikedVideos.length, cached.lastSync);
       renderVideos(allLikedVideos);
     } else {
-      // No cached data, load fresh data
       await loadLikedVideos();
     }
   } else {
     showLoginView();
   }
 
-  // Event listeners
   loginBtn.addEventListener('click', async () => {
     try {
       showLoading('Authenticating...');
@@ -247,13 +242,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Search button for immediate search
   searchBtn.addEventListener('click', () => performSearch(true));
   
-  // Debounced search as user types
   searchInput.addEventListener('input', () => performSearch(false));
   
-  // Enter key for immediate search
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       performSearch(true);

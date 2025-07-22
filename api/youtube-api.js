@@ -1,12 +1,10 @@
 
-// api/youtube-api.js - Fixed version for all liked videos
 export async function getAllLikedVideos(token, onProgress = null) {
   const allVideos = [];
   let nextPageToken = null;
   let pageCount = 0;
   
   do {
-    // Use playlistItems endpoint with the special "LL" playlist ID (Liked videos)
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=LL&maxResults=50${
       nextPageToken ? `&pageToken=${nextPageToken}` : ''
     }`;
@@ -19,7 +17,6 @@ export async function getAllLikedVideos(token, onProgress = null) {
       });
 
       if (!response.ok) {
-        // If LL playlist doesn't work, try the v1 videos endpoint
         if (response.status === 404 && pageCount === 0) {
           console.log("LL playlist not found, falling back to videos endpoint");
           return await getLikedVideosV1(token, onProgress);
@@ -29,7 +26,6 @@ export async function getAllLikedVideos(token, onProgress = null) {
 
       const data = await response.json();
       
-      // Convert playlistItems format to videos format for consistency
       const videos = data.items.map(item => ({
         id: item.snippet.resourceId.videoId,
         snippet: {
@@ -46,7 +42,6 @@ export async function getAllLikedVideos(token, onProgress = null) {
       nextPageToken = data.nextPageToken;
       pageCount++;
 
-      // Call progress callback if provided
       if (onProgress) {
         onProgress({
           currentCount: allVideos.length,
@@ -55,12 +50,10 @@ export async function getAllLikedVideos(token, onProgress = null) {
         });
       }
 
-      // Add small delay to respect rate limits
       await new Promise(resolve => setTimeout(resolve, 100));
 
     } catch (error) {
       console.error(`Error fetching page ${pageCount}:`, error);
-      // If we have some videos already, return them
       if (allVideos.length > 0) {
         console.log(`Returning ${allVideos.length} videos from ${pageCount} pages`);
         break;
@@ -72,7 +65,6 @@ export async function getAllLikedVideos(token, onProgress = null) {
   return allVideos;
 }
 
-// Fallback method using the original v1 approach
 async function getLikedVideosV1(token, onProgress = null) {
   const allVideos = [];
   let nextPageToken = null;
@@ -118,7 +110,6 @@ async function getLikedVideosV1(token, onProgress = null) {
   return allVideos;
 }
 
-// Cache management functions
 export async function getCachedVideos() {
   return new Promise((resolve) => {
     chrome.storage.local.get(['likedVideos', 'lastSync'], (result) => {
@@ -145,7 +136,6 @@ export function shouldRefreshCache(lastSync, maxAgeHours = 24) {
   return (Date.now() - lastSync) > maxAge;
 }
 
-// Search function with fuzzy matching
 export function searchVideos(videos, query) {
   if (!query.trim()) return videos;
   
